@@ -8,6 +8,11 @@
   background: red;
 }
 
+.neuron {
+  r: 10;
+  fill: red;
+}
+
 body {
   background-color: #eee;
 }
