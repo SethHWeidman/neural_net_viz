@@ -19,7 +19,7 @@ def visualize_neurons():
 
 @app.route('/check_number/', methods=['POST'])
 def check_number_page():
-    number = request.form['number']
+    number = request.form['number_to_check']
     number_message = check_number(number)
     return render_template('number_answer.html', number_message=number_message)
 
