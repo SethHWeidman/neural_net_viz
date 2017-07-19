@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Main page</title>
+
+  <!-- Theme CSS -->
+  <link href="../static/stylesheets/index.css" rel="stylesheet">
+</head>
+<body>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>
+
+var data = {{ data|safe }};
+// https://www.google.com/search?client=safari&rls=en&q=how+to+cast+a+python+string+quotes+as+quotes+to+pass+them+to+javascript+flask&ie=UTF-8&oe=UTF-8
+
+console.log(data);
+
+var width = 600,
+	height = 400;
+
+var svg = d3.select("body").append("svg")
+		.attr("width", width)
+		.attr("height", height);
+
+var neurons = svg.selectAll(".neuron")
+		.data(data)
+		.enter()
+		.append("circle")
+		.attr("class", "neuron")
+		.attr("cx", function(d) { return d.x; })
+		.attr("cy", function(d) { return d.y; });
+
+</script>
+
+<div id="circle">
+</div>
+
+<h1>Hello</h1>
+
+<form action="check_number/" method="post">
+<select name="number">
+  <option value="1">1</option>
+  <option value="2">2</option>
+  <option value="3">3</option>
+  <option value="4">4</option>
+  <option value="5">5</option>
+</select>
+<input type="submit" value="Submit">
+</form>
+
+<form action="/visualize_neurons/" method="post">
+<select name="number">
+  <option value="1">1</option>
+  <option value="2">2</option>
+  <option value="3">3</option>
+  <option value="4">4</option>
+  <option value="5">5</option>
+</select>
+<input type="submit" value="Visualize the neurons!">
+</form>
+
+</body>
+</html>
