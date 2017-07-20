@@ -9,12 +9,12 @@
 <body>
 
 <script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 <script>
 
-var data = [{"x" : 300, "y" : 50},
- 					  {"x" : 300, "y" : 150},
-						 {"x" : 300, "y" : 250},
-						 {"x" : 300, "y" : 350}];
+var data = {{ data|safe }}
+// https://www.google.com/search?client=safari&rls=en&q=how+to+cast+a+python+string+quotes+as+quotes+to+pass+them+to+javascript+flask&ie=UTF-8&oe=UTF-8
+console.log(data);
 
 var width = 600,
 	height = 400;
@@ -23,7 +23,7 @@ var svg = d3.select("body").append("svg")
 		.attr("width", width)
 		.attr("height", height);
 
-
+{% if data %}
 var neurons = svg.selectAll(".neuron")
 		.data(data)
 		.enter()
@@ -31,6 +31,14 @@ var neurons = svg.selectAll(".neuron")
 		.attr("class", "neuron")
 		.attr("cx", function(d) { return d.x; })
 		.attr("cy", function(d) { return d.y; });
+{% endif %}
+
+$(function(){
+    var $select = $(".1-100");
+    for (i=1;i<=100;i++){
+        $select.append($('<option></option>').val(i).html(i))
+    }
+});
 
 </script>
 
@@ -39,7 +47,7 @@ var neurons = svg.selectAll(".neuron")
 
 <h1>Hello</h1>
 
-<form action="check_number/" method="post">
+<form action="/visualize_neurons/" method="post">
 <select name="number">
   <option value="1">1</option>
   <option value="2">2</option>
@@ -47,7 +55,7 @@ var neurons = svg.selectAll(".neuron")
   <option value="4">4</option>
   <option value="5">5</option>
 </select>
-<input type="submit" value="Submit">
+<input type="submit" value="Visualize the neurons!">
 </form>
 
 </body>
