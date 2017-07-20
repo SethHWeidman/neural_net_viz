@@ -16,6 +16,11 @@ var data = {{ data|safe }}
 // https://www.google.com/search?client=safari&rls=en&q=how+to+cast+a+python+string+quotes+as+quotes+to+pass+them+to+javascript+flask&ie=UTF-8&oe=UTF-8
 console.log(data);
 
+var div = d3.select("body")
+		.append("div")
+    .attr("class", "tooltip")
+		.style("opacity", 0);
+
 var width = 600,
 	height = 400;
 
@@ -30,7 +35,23 @@ var neurons = svg.selectAll(".neuron")
 		.append("circle")
 		.attr("class", "neuron")
 		.attr("cx", function(d) { return d.x; })
-		.attr("cy", function(d) { return d.y; });
+		.attr("cy", function(d) { return d.y; })
+		.on("mouseover", function(d) {
+            div.style("left", d.x + 20 + "px")
+							 .style("top", d.y - 30 + "px")
+							 .text(d.y)
+							 .transition()
+               .duration(200)
+							 .style("opacity", .9)
+							})
+		.on("mouseout", function(d) {
+        div.style("left", d.x + 20 + "px")
+					 .style("top", d.y - 30 + "px")
+				   .text(d.y)
+					 .transition()
+           .duration(500)
+           .style("opacity", 0);
+					 });
 {% endif %}
 
 $(function(){
@@ -41,11 +62,6 @@ $(function(){
 });
 
 </script>
-
-<div id="circle">
-</div>
-
-<h1>Hello</h1>
 
 <form action="/visualize_neurons/" method="post">
 <select name="number">
