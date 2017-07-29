@@ -21,12 +21,9 @@ var div = d3.select("body")
     .attr("class", "tooltip")
 		.style("opacity", 0);
 
-var width = 600,
-	height = 400;
-
 var svg = d3.select("body").append("svg")
-		.attr("width", width)
-		.attr("height", height);
+		.attr("width", {{width}})
+		.attr("height", {{height}});
 
 {% if data %}
 var neurons = svg.selectAll(".neuron")
@@ -37,13 +34,13 @@ var neurons = svg.selectAll(".neuron")
 		.attr("cx", function(d) { return d.x; })
 		.attr("cy", function(d) { return d.y; })
 		.on("mouseover", function(d) {
-            div.style("left", d.x + 20 + "px")
-							 .style("top", d.y - 30 + "px")
-							 .text(d.y)
-							 .transition()
-               .duration(200)
-							 .style("opacity", .9)
-							})
+        div.style("left", d.x + 20 + "px")
+					 .style("top", d.y - 30 + "px")
+					 .text(d.y)
+					 .transition()
+           .duration(200)
+					 .style("opacity", .9)
+					})
 		.on("mouseout", function(d) {
         div.style("left", d.x + 20 + "px")
 					 .style("top", d.y - 30 + "px")
@@ -55,8 +52,15 @@ var neurons = svg.selectAll(".neuron")
 {% endif %}
 
 $(function(){
-    var $select = $(".neuron_selector");
+    var $select = $(".num_input_neurons");
     for (i=1;i<=5;i++){
+        $select.append($("<option></option>").val(i).html(i))
+    }
+});
+
+$(function(){
+    var $select = $(".num_hidden_neurons");
+    for (i=1;i<=10;i++){
         $select.append($("<option></option>").val(i).html(i))
     }
 });
@@ -64,9 +68,17 @@ $(function(){
 </script>
 
 <form action="/visualize_neurons/" method="post">
-<select name="number" class="neuron_selector">
+<select name="input_neurons" class="num_input_neurons">
 </select>
-<input type="submit" value="Visualize the neurons!">
+<input value="How many input neurons?">
+
+<select name="hidden_neurons" class="num_hidden_neurons">
+</select>
+<input  value="How many hidden neurons?">
+
+<button type="submit">
+	Click Me!
+</button>
 </form>
 
 </body>
