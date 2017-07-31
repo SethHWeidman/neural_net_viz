@@ -81,5 +81,15 @@ $(function(){
 </button>
 </form>
 
+<form action="/multiply_number/" methon="post">
+<button type="submit">
+	Click Me!
+</button>
+</form>
+
+{% if mult_num %}
+<p>{{mult_num}}</p>
+{% endif %}
+
 </body>
 </html>
