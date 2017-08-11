@@ -12,9 +12,12 @@
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 <script>
 
-var data = {{ data|safe }}
+var data = {{ data|safe }};
 // https://www.google.com/search?client=safari&rls=en&q=how+to+cast+a+python+string+quotes+as+quotes+to+pass+them+to+javascript+flask&ie=UTF-8&oe=UTF-8
-console.log(data);
+// console.log(data);
+
+var height = 480;
+var width = 600;
 
 var div = d3.select("body")
 		.append("div")
@@ -22,8 +25,8 @@ var div = d3.select("body")
 		.style("opacity", 0);
 
 var svg = d3.select("body").append("svg")
-		.attr("width", {{width}})
-		.attr("height", {{height}});
+		.attr("width", width)
+		.attr("height", height);
 
 {% if data %}
 var neurons = svg.selectAll(".neuron")
@@ -65,6 +68,19 @@ $(function(){
     }
 });
 
+$(function() {
+    var click_button = function(e) {
+      $.getJSON('../multiply_number', {
+        a: $('div[name="num"]').text()
+      }, function(return_val) {
+        $('#num').text(return_val.result);
+      });
+      return false;
+		};
+
+		$('button#MultiplyButton').bind('click', click_button);
+	});
+
 </script>
 
 <form action="/visualize_neurons/" method="post">
@@ -81,15 +97,14 @@ $(function(){
 </button>
 </form>
 
-<form action="/multiply_number/" methon="post">
-<button type="submit">
-	Click Me!
+<form action="/reset_data/" method="post">
+<button id="resetData">
+	Reset the data.
 </button>
 </form>
 
-{% if mult_num %}
-<p>{{mult_num}}</p>
-{% endif %}
+<div id="num">1</div>
 
+<div id="new_num">?</div>
 </body>
 </html>
