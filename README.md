@@ -16,16 +16,8 @@ N circles on an SVG.
 
 ### Updating the weights
 
-Load in a neural net object.
-Hard part: define a function to step just one step forward in the neural net.
-No! Define different functions for different steps:
-1. A function for computing inputs to neurons.
-2. A function for computing values of neurons. If the values have already been computed, don't do anything.
-  Make a button underneath each layer that computes the values for that layer.
-3.
-The way to visualize:
+In the `plot_net.py` function, the lines are now calculated that connect each neuron.
 
-Size of neurons: size of circles.
-Lines connecting: thickness = weights.
-Hover over neuron, see weights. Hover over neuron, see prior layer too.
-Need to store how neurons are connected. 
+To-do:
+1. Adjust the thickness based on the values (easy).
+2. Hook all this up with the neural_net function.  
