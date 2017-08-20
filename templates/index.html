@@ -13,6 +13,18 @@
 <script>
 
 var data = {{ data|safe }};
+var weights = {{ weights|safe }};
+
+function lookupNeuron(layer, neuron) {
+	for (var el in data) {
+		// debugger;
+	  if (data[el]["layer"] == layer && data[el]["neuron"] == neuron) {
+	    	return {"x": data[el]["x"], "y": data[el]["y"]};
+			};
+	};
+};
+
+
 // https://www.google.com/search?client=safari&rls=en&q=how+to+cast+a+python+string+quotes+as+quotes+to+pass+them+to+javascript+flask&ie=UTF-8&oe=UTF-8
 // console.log(data);
 
@@ -53,6 +65,26 @@ var neurons = svg.selectAll(".neuron")
            .style("opacity", 0);
 					 });
 {% endif %}
+{% if weights %}
+var lines = svg.selectAll(".weight_1")
+						.data(weights['input_to_hidden'])
+						.enter()
+						.append("line")
+						.attr("class", "weight_1")
+						.style("stroke", "black")
+						.attr("x1", function(d) {
+							return lookupNeuron(0, d["coordinates"][0])["x"];
+						})
+						.attr("x2", function(d) {
+							return lookupNeuron(1, d["coordinates"][1])["x"];
+						})
+						.attr("y1", function(d) {
+							return lookupNeuron(0, d["coordinates"][0])["y"];
+						})
+						.attr("y2", function(d) {
+							return lookupNeuron(1, d["coordinates"][1])["y"];
+						});
+{% endif %}
 
 $(function(){
     var $select = $(".num_input_neurons");
@@ -67,19 +99,6 @@ $(function(){
         $select.append($("<option></option>").val(i).html(i))
     }
 });
-
-$(function() {
-    var click_button = function(e) {
-      $.getJSON('../multiply_number', {
-        a: $('div[name="num"]').text()
-      }, function(return_val) {
-        $('#num').text(return_val.result);
-      });
-      return false;
-		};
-
-		$('button#MultiplyButton').bind('click', click_button);
-	});
 
 </script>
 
@@ -102,9 +121,5 @@ $(function() {
 	Reset the data.
 </button>
 </form>
-
-<div id="num">1</div>
-
-<div id="new_num">?</div>
 </body>
 </html>
