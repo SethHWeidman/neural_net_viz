@@ -12,22 +12,6 @@
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 <script>
 
-var data = {{ data|safe }};
-var weights = {{ weights|safe }};
-
-function lookupNeuron(layer, neuron) {
-	for (var el in data) {
-		// debugger;
-	  if (data[el]["layer"] == layer && data[el]["neuron"] == neuron) {
-	    	return {"x": data[el]["x"], "y": data[el]["y"]};
-			};
-	};
-};
-
-
-// https://www.google.com/search?client=safari&rls=en&q=how+to+cast+a+python+string+quotes+as+quotes+to+pass+them+to+javascript+flask&ie=UTF-8&oe=UTF-8
-// console.log(data);
-
 var height = 480;
 var width = 600;
 
@@ -39,52 +23,6 @@ var div = d3.select("body")
 var svg = d3.select("body").append("svg")
 		.attr("width", width)
 		.attr("height", height);
-
-{% if data %}
-var neurons = svg.selectAll(".neuron")
-		.data(data)
-		.enter()
-		.append("circle")
-		.attr("class", "neuron")
-		.attr("cx", function(d) { return d.x; })
-		.attr("cy", function(d) { return d.y; })
-		.on("mouseover", function(d) {
-        div.style("left", d.x + 20 + "px")
-					 .style("top", d.y - 30 + "px")
-					 .text(d.y)
-					 .transition()
-           .duration(200)
-					 .style("opacity", .9)
-					})
-		.on("mouseout", function(d) {
-        div.style("left", d.x + 20 + "px")
-					 .style("top", d.y - 30 + "px")
-				   .text(d.y)
-					 .transition()
-           .duration(500)
-           .style("opacity", 0);
-					 });
-{% endif %}
-{% if weights %}
-var lines = svg.selectAll(".weight_1")
-						.data(weights['input_to_hidden'])
-						.enter()
-						.append("line")
-						.attr("class", "weight_1")
-						.style("stroke", "black")
-						.attr("x1", function(d) {
-							return lookupNeuron(0, d["coordinates"][0])["x"];
-						})
-						.attr("x2", function(d) {
-							return lookupNeuron(1, d["coordinates"][1])["x"];
-						})
-						.attr("y1", function(d) {
-							return lookupNeuron(0, d["coordinates"][0])["y"];
-						})
-						.attr("y2", function(d) {
-							return lookupNeuron(1, d["coordinates"][1])["y"];
-						});
-{% endif %}
 
 $(function(){
     var $select = $(".num_input_neurons");
@@ -100,9 +38,16 @@ $(function(){
     }
 });
 
+$(function(){
+    var $select = $(".num_hidden_neurons");
+    for (i=1;i<=10;i++){
+        $select.append($("<option></option>").val(i).html(i))
+    }
+});
+
 </script>
 
-<form action="/visualize_neurons/" method="post">
+<form action="{{ url_for('visualize_neurons')}}" method="post">
 <select name="input_neurons" class="num_input_neurons">
 </select>
 <input value="How many input neurons?">
@@ -112,14 +57,10 @@ $(function(){
 <input  value="How many hidden neurons?">
 
 <button type="submit">
-	Click Me!
+	Start a net.
 </button>
 </form>
 
-<form action="/reset_data/" method="post">
-<button id="resetData">
-	Reset the data.
-</button>
-</form>
+
 </body>
 </html>

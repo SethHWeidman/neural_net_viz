@@ -3,7 +3,7 @@
 from pymongo import MongoClient
 
 def find_all_docs():
-    """Return all posts from the 'database', most recent first."""
+    """Find all the documents in the Mongo database."""
     client = MongoClient()
     db = client.viz_db
     collection_name = "viz_coll"
@@ -13,7 +13,7 @@ def find_all_docs():
     return None
 
 def find_key(key):
-    """Return all posts from the 'database', most recent first."""
+    """Find a document with a specific key in the Mongo database."""
     client = MongoClient()
     db = client.viz_db
     collection_name = "viz_coll"
@@ -24,7 +24,7 @@ def find_key(key):
     return output
 
 def add_key(key, value):
-    """Return all posts from the 'database', most recent first."""
+    """Add a new key-value pair to the Mongo database."""
     client = MongoClient()
     db = client.viz_db
     collection_name = "viz_coll"
@@ -37,7 +37,7 @@ def add_key(key, value):
     return None
 
 def update_key(key, value):
-    """Return all posts from the 'database', most recent first."""
+    """Update the value for a key in the Mongo database."""
     client = MongoClient()
     db = client.viz_db
     collection_name = "viz_coll"
@@ -51,7 +51,7 @@ def update_key(key, value):
     return True
 
 def delete_key(key):
-    """Return all posts from the 'database', most recent first."""
+    """Delete the item associated with a key in a Mongo database."""
     client = MongoClient()
     db = client.viz_db
     collection_name = "viz_coll"
@@ -64,7 +64,7 @@ def delete_key(key):
     return None
 
 def delete_all_docs():
-    """Return all posts from the 'database', most recent first."""
+    """Delete everything from the database."""
     client = MongoClient()
     db = client.viz_db
     db.command("dropDatabase")

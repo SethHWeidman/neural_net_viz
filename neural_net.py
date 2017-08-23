@@ -41,6 +41,7 @@ class Layer(object):
         """ Calculate input gradient. """
         raise NotImplementedError()
 
+# Break out activations as separate layers? As in Keras?
 class Linear(Layer):
 
     random_seed = None
@@ -78,3 +79,22 @@ def sigmoid(x, bprop=False):
         return s*(1-s)
     else:
         return 1.0/(1.0+np.exp(-x))
+
+# Not sure how I'm going to do this...
+class TwoLayerNetwork(NeuralNetwork):
+    '''
+    Class for a neural network with only one hidden layer.
+    '''
+    def __init__(self, layers, random_seed):
+        NeuralNetwork.__init__(self, layers, random_seed)
+
+    def return_layer_outputs(self, X):
+        """ Calculate an output Y for the given input X. """
+        layer_outputs = []
+        X_next = X
+        layer_outputs.append(np.mean(X_next, axis=0))
+        for layer in self.layers:
+            X_next = layer.fprop(X_next)
+            # Collapse across observations
+            layer_outputs.append(np.mean(X_next, axis=0))
+        return layer_outputs
