@@ -48,25 +48,19 @@ def visualize_data():
     coords = update_coordinate_values(layers, coords)
 
     db.add_key("coordinates", coords)
-
+    db.add_key("weights", weights)
+    # import pdb; pdb.set_trace()
     return render_template('visualize.html',
-                           data=coords)
-                        #    weights=db.find_key('weights'))
+                           data=coords,
+                           weights=db.find_key("weights"))
 
 @app.route('/update_one/', methods=['GET', 'POST'])
 def update_one():
-    print("Entering update one")
-
     coords = db.find_key("coordinates")
-    print("coords before", coords)
     for item in coords:
         if item['neuron'] == 0  and item['layer'] == 0:
             item['value'] = 1
-    print()
-    print("Completed the update; sleeping")
-    print("coords after", coords)
     time.sleep(3)
-    print("Done sleeping")
     return jsonify(data=coords)
 
 

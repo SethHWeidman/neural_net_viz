@@ -13,7 +13,8 @@
 <script>
 
 var data = {{ data|safe }};
-// var weights = {{ weights|safe }};
+var weights = {{ weights|safe }};
+
 
 function lookupNeuron(layer, neuron) {
 	for (var el in data) {
