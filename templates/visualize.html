@@ -70,7 +70,7 @@ var neurons = svg.selectAll(".neuron")
 {% endif %}
 {% if weights %}
 var weights_1 = svg.selectAll(".weight_1")
-						.data(weights['input_to_hidden'])
+						.data(weights[0])
 						.enter()
 						.append("line")
 						.attr("class", "weight_1")
@@ -86,10 +86,13 @@ var weights_1 = svg.selectAll(".weight_1")
 						})
 						.attr("y2", function(d) {
 							return lookupNeuron(1, d["coordinates"][1])["y"];
+						})
+						.attr("stroke-width", function(d) {
+							return d['value'];
 						});
 
 var weights_2 = svg.selectAll(".weight_2")
-						.data(weights['hidden_to_output'])
+						.data(weights[1])
 						.enter()
 						.append("line")
 						.attr("class", "weight_2")
@@ -105,6 +108,9 @@ var weights_2 = svg.selectAll(".weight_2")
 						})
 						.attr("y2", function(d) {
 							return lookupNeuron(2, d["coordinates"][1])["y"];
+						})
+						.attr("stroke-width", function(d) {
+							return d['value'];
 						});
 {% endif %}
 </script>
@@ -133,7 +139,6 @@ function updateOneNeuron() {
         data: data,
         type: 'POST',
         success: function(response) {
-          // debugger;
           updateShapes(response['data']);
         },
         error: function(error) {

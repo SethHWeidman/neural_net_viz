@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify
 from neural_net import NeuralNetwork, Linear, sigmoid
 from python.plot_net import plot_net
 from python.plot_net import update_coordinate_values
+from python.plot_net import update_weight_values
 from python.generate_data import generate_data
 from neural_net import TwoLayerNetwork, Linear
 import python.database as db
@@ -20,6 +21,13 @@ def hello_world():
 def clean_layers(layers):
     layers = [np.round(layer, 3) for layer in layers]
     return [layer.tolist() for layer in layers]
+
+
+def clean_weights(weights):
+
+    mi = np.amin(weights)
+    ma = np.amax(weights)
+    return (weights - mi) / (ma - mi) + 0.5
 
 
 @app.route('/visualize_data/', methods=['GET', 'POST'])
@@ -45,13 +53,19 @@ def visualize_data():
     layers = nn.return_layer_outputs(x_row)
     layers_clean = clean_layers(layers)
 
+    weight_values = nn.return_weights(x_row)
+    weight_values = [clean_weights(weight_matrix).tolist() for weight_matrix in weight_values]
+
     coords = update_coordinate_values(layers, coords)
+    # import pdb; pdb.set_trace()
+    weights = update_weight_values(weights, weight_values)
+
 
     db.add_key("coordinates", coords)
     db.add_key("weights", weights)
-    # import pdb; pdb.set_trace()
+
     return render_template('visualize.html',
-                           data=coords,
+                           data=db.find_key("coordinates"),
                            weights=db.find_key("weights"))
 
 @app.route('/update_one/', methods=['GET', 'POST'])

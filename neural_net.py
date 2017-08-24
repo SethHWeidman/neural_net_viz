@@ -98,3 +98,8 @@ class TwoLayerNetwork(NeuralNetwork):
             # Collapse across observations
             layer_outputs.append(np.mean(X_next, axis=0))
         return layer_outputs
+
+    def return_weights(self, X):
+        """ Calculate an output Y for the given input X. """
+        weights = [layer.W for layer in self.layers]
+        return weights

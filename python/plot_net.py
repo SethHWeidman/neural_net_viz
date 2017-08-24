@@ -51,7 +51,7 @@ def plot_net(num_input, num_hidden, height, width):
     all_neurons = input_neurons + hidden_neurons + output_neuron
 
     # A "weight dictionary"
-    all_weights = {'input_to_hidden': weights_1, 'hidden_to_output': weights_2}
+    all_weights = [weights_1] + [weights_2]
 
     return all_neurons, all_weights
 
@@ -67,3 +67,17 @@ def update_coordinate_values(layers, coords):
                 if item['layer'] == i and item['neuron'] == j:
                     item['value'] = element
     return coords
+
+
+def update_weight_values(weights, weight_values):
+    '''
+    Updates the values contained in the "weights" dictionary, based on the
+    values in the weight_values array of arrays.
+    '''
+    for k in range(len(weights)):
+        for i, weight_col in enumerate(weight_values[k]):
+            for j, weight_val in enumerate(weight_col):
+                for el in weights[k]:
+                    if el['coordinates'][0] == i and el['coordinates'][1] == j:
+                        el['value'] = weight_val
+    return weights
