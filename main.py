@@ -18,13 +18,23 @@ def hello_world():
     return render_template('index.html')
 
 
-def clean_layers(layers):
-    layers = [np.round(layer, 3) for layer in layers]
-    return [layer.tolist() for layer in layers]
+def clean_layer(layer):
+    '''
+    Layers is a list of numpy arrays
+    '''
+    # import pdb; pdb.set_trace()
+    if len(layer) == 1:
+        return [15.0]
+    else:
+        mi = np.amin(layer)
+        ma = np.amax(layer)
+        layer = ((layer - mi) / (ma - mi) * 10.0) + 10.0
+        layer = [np.round(el, 3) for el in layer]
+        return layer
 
 
 def clean_weights(weights):
-
+    # import pdb; pdb.set_trace()
     mi = np.amin(weights)
     ma = np.amax(weights)
     return (weights - mi) / (ma - mi) + 0.5
@@ -51,15 +61,14 @@ def visualize_data():
     x_row = df_x.sample(random_state=823)
 
     layers = nn.return_layer_outputs(x_row)
-    layers_clean = clean_layers(layers)
+    layers_clean = [clean_layer(layer) for layer in layers]
 
     weight_values = nn.return_weights(x_row)
     weight_values = [clean_weights(weight_matrix).tolist() for weight_matrix in weight_values]
 
-    coords = update_coordinate_values(layers, coords)
     # import pdb; pdb.set_trace()
+    coords = update_coordinate_values(layers_clean, coords)
     weights = update_weight_values(weights, weight_values)
-
 
     db.add_key("coordinates", coords)
     db.add_key("weights", weights)
@@ -68,15 +77,15 @@ def visualize_data():
                            data=db.find_key("coordinates"),
                            weights=db.find_key("weights"))
 
+
 @app.route('/update_one/', methods=['GET', 'POST'])
 def update_one():
     coords = db.find_key("coordinates")
     for item in coords:
         if item['neuron'] == 0  and item['layer'] == 0:
-            item['value'] = 1
+            item['value'] = 30.0
     time.sleep(3)
     return jsonify(data=coords)
-
 
 
 @app.route('/visualize_neurons/', methods=['GET', 'POST'])

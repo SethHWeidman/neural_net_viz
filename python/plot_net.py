@@ -47,7 +47,7 @@ def plot_net(num_input, num_hidden, height, width):
     hidden_neurons = [{'x': hidden_x, 'y': y, 'layer': 1, 'neuron': i, 'value': 1} for i, y in enumerate(hidden_ys)]
     output_neuron = [{'x': output_x, 'y': y, 'layer': 2, 'neuron': i, 'value': 1} for i, y in enumerate([output_y])]
 
-    #
+    # All the neurons
     all_neurons = input_neurons + hidden_neurons + output_neuron
 
     # A "weight dictionary"
