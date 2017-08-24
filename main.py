@@ -1,7 +1,13 @@
 from flask import Flask, render_template, request, jsonify
 from neural_net import NeuralNetwork, Linear, sigmoid
-from plot_net import plot_net
-import database as db
+from python.plot_net import plot_net
+from python.plot_net import update_coordinate_values
+from python.generate_data import generate_data
+from neural_net import TwoLayerNetwork, Linear
+import python.database as db
+import pandas as pd
+import numpy as np
+import time
 
 app = Flask(__name__)
 
@@ -11,26 +17,58 @@ def hello_world():
     return render_template('index.html')
 
 
+def clean_layers(layers):
+    layers = [np.round(layer, 3) for layer in layers]
+    return [layer.tolist() for layer in layers]
+
+
 @app.route('/visualize_data/', methods=['GET', 'POST'])
 def visualize_data():
     # Get in number of input neurons
+    num_input = int(request.form['input_neurons'])
+    num_hidden = int(request.form['hidden_neurons'])
 
-    # Generate data
+    # Generate data - updates database with data.
+    df = generate_data(num_input)
+
+    # Inside plot net, get one row from the dataFrame
+    coords, weights = plot_net(num_input, num_hidden, 480, 600)
 
     # Add something to the values so it doesn't plot zeros.
+    layer1 = Linear(n_in=num_input, n_out=num_hidden, activation_function=sigmoid)
+    layer2 = Linear(n_in=num_hidden, n_out=1, activation_function=sigmoid)
+    nn = TwoLayerNetwork(layers=[layer1, layer2], random_seed=823)
 
-    # Feed these values into the input layer
-        # On hover, show the value of the whole data point, and just the neuron value.
+    df_x = pd.read_json(db.find_key('dataframe'))[db.find_key('x_cols')]
+    x_row = df_x.sample(random_state=823)
 
-    # Add the weights back in so the thicknesses are adjusted based on their values.
+    layers = nn.return_layer_outputs(x_row)
+    layers_clean = clean_layers(layers)
 
-    # Have a button on the page that you can click that updates the next layer in the
-    # net
+    coords = update_coordinate_values(layers, coords)
 
-    # Have a button you can click that is enabled after the last layer is updated that
-    # lets you backpropogate the weights
+    db.add_key("coordinates", coords)
 
-    # Do all of this with transitions
+    return render_template('visualize.html',
+                           data=coords)
+                        #    weights=db.find_key('weights'))
+
+@app.route('/update_one/', methods=['GET', 'POST'])
+def update_one():
+    print("Entering update one")
+
+    coords = db.find_key("coordinates")
+    print("coords before", coords)
+    for item in coords:
+        if item['neuron'] == 0  and item['layer'] == 0:
+            item['value'] = 1
+    print()
+    print("Completed the update; sleeping")
+    print("coords after", coords)
+    time.sleep(3)
+    print("Done sleeping")
+    return jsonify(data=coords)
+
 
 
 @app.route('/visualize_neurons/', methods=['GET', 'POST'])

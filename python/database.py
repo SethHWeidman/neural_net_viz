@@ -1,4 +1,3 @@
-# Database code for the DB Forum, full solution!
 
 from pymongo import MongoClient
 

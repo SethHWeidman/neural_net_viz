@@ -92,7 +92,7 @@ class TwoLayerNetwork(NeuralNetwork):
         """ Calculate an output Y for the given input X. """
         layer_outputs = []
         X_next = X
-        layer_outputs.append(np.mean(X_next, axis=0))
+        layer_outputs.append(np.mean(X_next, axis=0).values)
         for layer in self.layers:
             X_next = layer.fprop(X_next)
             # Collapse across observations

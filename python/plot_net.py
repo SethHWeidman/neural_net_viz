@@ -43,13 +43,27 @@ def plot_net(num_input, num_hidden, height, width):
         weights_2.append(d)
 
     # Other information about the neurons
-    input_neurons = [{'x': input_x, 'y': y, 'layer': 0, 'neuron': i} for i, y in enumerate(input_ys)]
-    hidden_neurons = [{'x': hidden_x, 'y': y, 'layer': 1, 'neuron': i} for i, y in enumerate(hidden_ys)]
-    output_neuron = [{'x': output_x, 'y': output_y, 'layer': 2, 'neuron': i} for i, y in enumerate(hidden_ys)]
+    input_neurons = [{'x': input_x, 'y': y, 'layer': 0, 'neuron': i, 'value': 1} for i, y in enumerate(input_ys)]
+    hidden_neurons = [{'x': hidden_x, 'y': y, 'layer': 1, 'neuron': i, 'value': 1} for i, y in enumerate(hidden_ys)]
+    output_neuron = [{'x': output_x, 'y': y, 'layer': 2, 'neuron': i, 'value': 1} for i, y in enumerate([output_y])]
 
+    #
     all_neurons = input_neurons + hidden_neurons + output_neuron
 
     # A "weight dictionary"
     all_weights = {'input_to_hidden': weights_1, 'hidden_to_output': weights_2}
 
     return all_neurons, all_weights
+
+def update_coordinate_values(layers, coords):
+    '''
+    Updates the values contained in the "coordinates" dictionary, based on the
+    values returned from the neural net, which are in a list of lists.
+    '''
+    for i in range(len(layers)):
+        layer = layers[i]
+        for item in coords:
+            for j, element in enumerate(layer):
+                if item['layer'] == i and item['neuron'] == j:
+                    item['value'] = element
+    return coords
