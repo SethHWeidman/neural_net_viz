@@ -20,9 +20,9 @@ def hello_world():
 
 def clean_layer(layer):
     '''
-    Layers is a list of numpy arrays
+    Layer is a numpy array
     '''
-    # import pdb; pdb.set_trace()
+
     if len(layer) == 1:
         return [15.0]
     else:
@@ -34,7 +34,9 @@ def clean_layer(layer):
 
 
 def clean_weights(weights):
-    # import pdb; pdb.set_trace()
+    '''
+    Scale the weights matrix
+    '''
     mi = np.amin(weights)
     ma = np.amax(weights)
     return (weights - mi) / (ma - mi) + 0.5
@@ -60,19 +62,25 @@ def visualize_data():
     df_x = pd.read_json(db.find_key('dataframe'))[db.find_key('x_cols')]
     x_row = df_x.sample(random_state=823)
 
+    # Take this single observation and run it through the network to generate
+    # values for the layers
     layers = nn.return_layer_outputs(x_row)
     layers_clean = [clean_layer(layer) for layer in layers]
 
+    # Simply extract the weight values
     weight_values = nn.return_weights(x_row)
     weight_values = [clean_weights(weight_matrix).tolist() for weight_matrix in weight_values]
 
-    # import pdb; pdb.set_trace()
+    # In the coords and weights "objects", update the weights and coordinates
+    # values
     coords = update_coordinate_values(layers_clean, coords)
     weights = update_weight_values(weights, weight_values)
 
+    # Add these to the database for further use
     db.add_key("coordinates", coords)
     db.add_key("weights", weights)
 
+    # Render the template!
     return render_template('visualize.html',
                            data=db.find_key("coordinates"),
                            weights=db.find_key("weights"))

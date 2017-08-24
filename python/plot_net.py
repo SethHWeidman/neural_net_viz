@@ -7,6 +7,7 @@ def plot_net(num_input, num_hidden, height, width):
     points on the net in space.
     '''
 
+    # Set up the margins
     input_height_margin = 100
     hidden_height_margin = 50
     width_margin = 100
@@ -27,20 +28,8 @@ def plot_net(num_input, num_hidden, height, width):
 
     output_y = height / 2.0
 
-    # Coordinates for weight lines
-    weight_matrix_1 = np.ones(num_input * num_hidden)
-    list_of_weights = list(itertools.product(range(num_input), range(num_hidden)))
-    weights_1 = []
-    for el1, el2 in zip(weight_matrix_1, list_of_weights):
-        d = {'value': el1, 'coordinates': el2}
-        weights_1.append(d)
-
-    weight_matrix_2 = np.ones(num_hidden * 1)
-    list_of_weights = list(itertools.product(range(num_hidden+1), range(1)))
-    weights_2 = []
-    for el1, el2 in zip(weight_matrix_2, list_of_weights):
-        d = {'value': el1, 'coordinates': el2}
-        weights_2.append(d)
+    weights_1 = initialize_weight_values(num_input, num_hidden)
+    weights_2 = initialize_weight_values(num_hidden, 1)
 
     # Other information about the neurons
     input_neurons = [{'x': input_x, 'y': y, 'layer': 0, 'neuron': i, 'value': 1} for i, y in enumerate(input_ys)]
@@ -55,10 +44,29 @@ def plot_net(num_input, num_hidden, height, width):
 
     return all_neurons, all_weights
 
+def initialize_weight_values(num_input, num_hidden):
+    '''
+    Takes in a number of input and hidden neurons and returns a list of dictionaries,
+    of the form:
+    [{'value': 1, 'coordinates': [0,0]}, {'value': 1, 'coordinates': [0,1]}, ...]
+    '''
+    # Coordinates for weight lines
+    weight_matrix = np.ones(num_input * num_hidden)
+    list_of_weights = list(itertools.product(range(num_input), range(num_hidden)))
+    weights = []
+    for el1, el2 in zip(weight_matrix, list_of_weights):
+        d = {'value': el1, 'coordinates': el2}
+        weights.append(d)
+    return weights
+
+
 def update_coordinate_values(layers, coords):
     '''
     Updates the values contained in the "coordinates" dictionary, based on the
     values returned from the neural net, which are in a list of lists.
+
+    layers: a list of lists
+    coords: a list of coordinates objects
     '''
     for i in range(len(layers)):
         layer = layers[i]
@@ -73,6 +81,11 @@ def update_weight_values(weights, weight_values):
     '''
     Updates the values contained in the "weights" dictionary, based on the
     values in the weight_values array of arrays.
+
+    weights: a list of lists of key value pairs, each of which has a "value" and
+    "coordinates".
+    weight_values: a list of lists of lists simple containing the weight values,
+    each of which is a matrix
     '''
     for k in range(len(weights)):
         for i, weight_col in enumerate(weight_values[k]):

@@ -38,13 +38,6 @@ $(function(){
     }
 });
 
-$(function(){
-    var $select = $(".num_hidden_neurons");
-    for (i=1;i<=10;i++){
-        $select.append($("<option></option>").val(i).html(i))
-    }
-});
-
 </script>
 
 <form action="{{ url_for('visualize_data')}}" method="post">
