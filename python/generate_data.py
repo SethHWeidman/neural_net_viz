@@ -27,16 +27,8 @@ def generate_data(input_neurons):
     mms = MinMaxScaler(feature_range=(1, 2))
     df[all_cols] = mms.fit_transform(df[all_cols])
 
-    db.add_key("dataframe", df.to_json())
-    db.add_key("x_cols", x_cols)
-    db.add_key("num_obs", num_obs)
+    db.create_key("dataframe", df)
+    db.create_key("x_cols", x_cols)
+    db.create_key("num_obs", num_obs)
 
     return df
-
-def add_data_to_db(df, x_cols):
-    '''
-    Add necessary data to database
-    '''
-
-
-    return True

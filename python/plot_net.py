@@ -52,7 +52,7 @@ def initialize_weight_values(num_input, num_hidden):
     '''
     # Coordinates for weight lines
     weight_matrix = np.ones(num_input * num_hidden)
-    list_of_weights = list(itertools.product(range(num_input), range(num_hidden)))
+    list_of_weights = [[x, y] for x in range(num_input) for y in range(num_hidden)]
     weights = []
     for el1, el2 in zip(weight_matrix, list_of_weights):
         d = {'value': el1, 'coordinates': el2}

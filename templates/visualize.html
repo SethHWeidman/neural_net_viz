@@ -76,6 +76,7 @@ var weights_1 = svg.selectAll(".weight_1")
 						.attr("class", "weight_1")
 						.style("stroke", "black")
 						.attr("x1", function(d) {
+							debugger;
 							return lookupNeuron(0, d["coordinates"][0])["x"];
 						})
 						.attr("x2", function(d) {

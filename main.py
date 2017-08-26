@@ -24,7 +24,7 @@ def clean_layer(layer):
     Layer is a numpy array
     '''
 
-    if type(layer) == np.float64:
+    if len(layer) == 1:
         return [15.0]
     else:
         mi = np.amin(layer)
@@ -61,14 +61,14 @@ def visualize_data():
     nn = TwoLayerNetwork(layers=[layer1, layer2], random_seed=823)
 
     # Sample one row of x data
-    df_x = pd.read_json(db.find_key('dataframe'))[db.find_key('x_cols')]
-    samp = np.random.randint(0, db.find_key('num_obs'))
-    x_row = df_x.iloc[samp, :]
+    df_x = db.read_key('dataframe')[db.read_key('x_cols')]
+    samp = np.random.randint(0, db.read_key('num_obs'))
+    x_row = np.array(df_x.iloc[samp, :], ndmin=2)
 
     # Sample one y observation
     # import pdb; pdb.set_trace()
-    df_y = pd.read_json(db.find_key('dataframe'))["Y"]
-    y_row = df_y.iloc[samp]
+    df_y = db.read_key('dataframe')["Y"]
+    y_row = np.array(df_y.iloc[samp], ndmin=2)
 
     # Take this single observation and run it through the network to generate
     # values for the layers
@@ -85,28 +85,26 @@ def visualize_data():
     weights = update_weight_values(weights, weight_values)
 
     # Add these to the database for further use
-    db.add_key("coordinates", coords)
-    db.add_key("weights", weights)
+    db.create_key("coordinates", coords)
+    db.create_key("weights", weights)
 
     # Compute loss
     loss = nn.loss(prediction, y_row)
 
-    pickle.dump(nn, open("nn_data.p", "wb"))
-    
-    db.add_key("coordinates", coords)
-    db.add_key("weights", weights)
-    db.add_key("loss", loss.tolist())
-    db.add_key("neural_net", )
+    db.create_key("coordinates", coords)
+    db.create_key("weights", weights)
+    db.create_key("loss", loss.tolist())
+    db.create_key("neural_net", nn)
 
     # Render the template!
     return render_template('visualize.html',
-                           data=db.find_key("coordinates"),
-                           weights=db.find_key("weights"))
+                           data=db.read_key("coordinates"),
+                           weights=db.read_key("weights"))
 
 
 @app.route('/update_one/', methods=['GET', 'POST'])
 def update_one():
-    coords = db.find_key("coordinates")
+    coords = db.read_key("coordinates")
     for item in coords:
         if item['neuron'] == 0  and item['layer'] == 0:
             item['value'] = 30.0
@@ -116,9 +114,10 @@ def update_one():
 
 @app.route('/update_next_weight_layer/', methods=['GET', 'POST'])
 def update_next_layer():
-    loss = db.find_key("loss")
+    nn = db.read_key("neural_net")
+    loss = db.read_key("loss")
     weight_values = nn.update_num_layer_weights(loss, num=1)
-    weights = update_weight_values(db.find_key('weights'), weight_values)
+    weights = update_weight_values(db.read_key('weights'), weight_values)
     time.sleep(3)
     return jsonify(data=weights)
 
@@ -131,11 +130,11 @@ def visualize_neurons():
     num_input = int(input_neurons)
     num_hidden = int(hidden_neurons)
     xs_ys, weights = plot_net(num_input, num_hidden, 480, 600)
-    db.add_key('data', xs_ys)
-    db.add_key('weights', weights)
+    db.create_key('data', xs_ys)
+    db.create_key('weights', weights)
     return render_template('visualize_neurons.html',
-                           data=db.find_key('data'),
-                           weights=db.find_key('weights'))
+                           data=db.read_key('data'),
+                           weights=db.read_key('weights'))
 
 
 
@@ -164,17 +163,17 @@ def visualize_neurons():
 @app.route('/reset_data/', methods=['GET', 'POST'])
 def reset_data():
     print("The reset data button was clicked")
-    db.delete_all_docs()
-    if not db.find_key("data"):
-        db.add_key("data", [])
-    if not db.find_key("weights"):
-        db.add_key("weights", [])
-    if not db.find_key("coordinates"):
-        db.add_key("coordinates", [])
+    db.delete_all_keys()
+    if not db.read_key("data"):
+        db.create_key("data", [])
+    if not db.read_key("weights"):
+        db.create_key("weights", [])
+    if not db.read_key("coordinates"):
+        db.create_key("coordinates", [])
     return render_template('index.html',
-                           coordinates=db.find_key('coordinates'),
-                           data=db.find_key('data'),
-                           weights=db.find_key('weights'))
+                           coordinates=db.read_key('coordinates'),
+                           data=db.read_key('data'),
+                           weights=db.read_key('weights'))
 
 
 if __name__ == '__main__':
