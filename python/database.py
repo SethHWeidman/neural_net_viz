@@ -1,4 +1,3 @@
-
 from pymongo import MongoClient
 
 def find_all_docs():

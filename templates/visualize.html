@@ -125,17 +125,33 @@ var weights_2 = svg.selectAll(".weight_2")
 function updateShapes(data_new) {
   console.log("Entering update shapes");
 
-  var neurons = svg.selectAll(".neuron")
-  		.data(data_new)
-      .transition()
-      .duration(2000)
-      .attr("r", function(d) { return d.value; });
+	var weights_1 = svg.selectAll(".weight_1")
+							.data(data_new[0])
+							.transition()
+				      .duration(2000)
+							.attr("stroke-width", function(d) {
+								return d['value'];
+							});
+
+	var weights_2 = svg.selectAll(".weight_2")
+							.data(data_new[0])
+							.transition()
+				      .duration(2000)
+							.attr("stroke-width", function(d) {
+								return d['value'];
+							});
+	//
+  // var neurons = svg.selectAll(".neuron")
+  // 		.data(data_new)
+  //     .transition()
+  //     .duration(2000)
+  //     .attr("r", function(d) { return d.value; });
 };
 
 
 function updateOneNeuron() {
       $.ajax({
-        url: {{ url_for('update_one')}},
+        url: {{ url_for('update_next_layer')}},
         data: data,
         type: 'POST',
         success: function(response) {

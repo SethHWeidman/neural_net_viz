@@ -11,7 +11,9 @@ def generate_data(input_neurons):
     '''
     Generate data based on the number of input neurons
     '''
-    X1, Y1 = make_classification(n_features=input_neurons,
+    num_obs = 100
+    X1, Y1 = make_classification(n_samples=num_obs,
+                                 n_features=input_neurons,
                                  n_redundant=0,
                                  n_informative=1,
                                  n_clusters_per_class=1)
@@ -25,7 +27,9 @@ def generate_data(input_neurons):
     mms = MinMaxScaler(feature_range=(1, 2))
     df[all_cols] = mms.fit_transform(df[all_cols])
 
-    add_data_to_db(df.to_json(), x_cols)
+    db.add_key("dataframe", df.to_json())
+    db.add_key("x_cols", x_cols)
+    db.add_key("num_obs", num_obs)
 
     return df
 
@@ -33,7 +37,6 @@ def add_data_to_db(df, x_cols):
     '''
     Add necessary data to database
     '''
-    db.add_key("dataframe", df)
-    db.add_key("x_cols", x_cols)
+
 
     return True

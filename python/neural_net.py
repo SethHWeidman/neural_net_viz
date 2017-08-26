@@ -1,4 +1,8 @@
 import numpy as np
+import os.path
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '.'))
+import database as db
 
 class NeuralNetwork(object):
     def __init__(self, layers, random_seed):
@@ -88,18 +92,42 @@ class TwoLayerNetwork(NeuralNetwork):
     def __init__(self, layers, random_seed):
         NeuralNetwork.__init__(self, layers, random_seed)
 
-    def return_layer_outputs(self, X):
-        """ Calculate an output Y for the given input X. """
+
+    def return_forwardpass_info(self, X):
+        """ Calculate an output Y for the given input X.
+        returns: layer_outputs, a list of all the layer values, averaged across
+        observations that were passed through the net."""
         layer_outputs = []
         X_next = X
-        layer_outputs.append(np.mean(X_next, axis=0).values)
+        layer_outputs.append(np.mean(X_next, axis=0))
         for layer in self.layers:
             X_next = layer.fprop(X_next)
             # Collapse across observations
             layer_outputs.append(np.mean(X_next, axis=0))
-        return layer_outputs
+        prediction = X_next
+        return layer_outputs, prediction
 
-    def return_weights(self, X):
+
+    def return_weights(self):
         """ Calculate an output Y for the given input X. """
         weights = [layer.W for layer in self.layers]
+        return weights
+
+
+    def update_num_layer_weights(self, loss, num=1):
+        """ Calculate an output Y for the given input X. """
+
+        if db.find_key("next_weight_layer"):
+            next_weight_layer = db.find_key("next_weight_layer")
+        else:
+            next_weight_layer = len(self.layers) - 1
+            db.add_key("next_weight_layer", next_weight_layer)
+
+        relevant_layers = reversed(self.layers[:next_weight_layer+1])[num:]
+
+        loss_next = loss
+        for layer in relevant_layers:
+            loss_next = layer.bprop(loss_next)
+
+        weights = return_weights(self)
         return weights
