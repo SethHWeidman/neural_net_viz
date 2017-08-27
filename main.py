@@ -34,13 +34,16 @@ def clean_layer(layer):
         return layer
 
 
-def clean_weights(weights):
+def clean_weights(weight_values):
     '''
     Scale the weights matrix
     '''
-    mi = np.amin(weights)
-    ma = np.amax(weights)
-    return (weights - mi) / (ma - mi) + 0.5
+    def _scale_weight_matrix(matrix):
+        mi = np.amin(matrix)
+        ma = np.amax(matrix)
+        return ((matrix - mi) / (ma - mi) * 4.0) + 1.0
+
+    return [_scale_weight_matrix(weight_matrix).tolist() for weight_matrix in weight_values]
 
 
 @app.route('/visualize_data/', methods=['GET', 'POST'])
@@ -77,16 +80,12 @@ def visualize_data():
 
     # Simply extract the weight values
     weight_values = nn.return_weights()
-    weight_values = [clean_weights(weight_matrix).tolist() for weight_matrix in weight_values]
+    weight_values = clean_weights(weight_values)
 
     # In the coords and weights "objects", update the weights and coordinates
     # values
     coords = update_coordinate_values(layers_clean, coords)
     weights = update_weight_values(weights, weight_values)
-
-    # Add these to the database for further use
-    db.create_key("coordinates", coords)
-    db.create_key("weights", weights)
 
     # Compute loss
     loss = nn.loss(prediction, y_row)
@@ -95,7 +94,6 @@ def visualize_data():
     db.create_key("weights", weights)
     db.create_key("loss", loss.tolist())
     db.create_key("neural_net", nn)
-
     # Render the template!
     return render_template('visualize.html',
                            data=db.read_key("coordinates"),
@@ -108,7 +106,7 @@ def update_one():
     for item in coords:
         if item['neuron'] == 0  and item['layer'] == 0:
             item['value'] = 30.0
-    time.sleep(3)
+    time.sleep(10)
     return jsonify(data=coords)
 
 
@@ -117,8 +115,10 @@ def update_next_layer():
     nn = db.read_key("neural_net")
     loss = db.read_key("loss")
     weight_values = nn.update_num_layer_weights(loss, num=1)
+    weight_values = clean_weights(weight_values)
     weights = update_weight_values(db.read_key('weights'), weight_values)
-    time.sleep(3)
+    time.sleep(5)
+    print("Updated weight layer in Python")
     return jsonify(data=weights)
 
 
@@ -177,4 +177,4 @@ def reset_data():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5001)

@@ -124,7 +124,6 @@ class TwoLayerNetwork(NeuralNetwork):
             db.create_key("next_weight_layer", next_weight_layer)
 
         relevant_layers = self.layers[:next_weight_layer+1][::-1][:num]
-        # import pdb; pdb.set_trace()
         loss_next = loss
         for layer in relevant_layers:
             loss_next = layer.bprop(loss_next)
