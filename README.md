@@ -6,7 +6,6 @@ Run `python main.py` and navigate to `http://127.0.0.1:5000/` to see the app in 
 
 ## To-do
 
-Scale weights so they don't disappear (medium)
 Encapsulate weight update in one function (easy)
 Make one _layer_ of the network update (medium)
 Make future weight layers of the network update (easy)

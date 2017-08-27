@@ -69,50 +69,35 @@ var neurons = svg.selectAll(".neuron")
 					 });
 {% endif %}
 {% if weights %}
-var weights_1 = svg.selectAll(".weight_1")
-						.data(weights[0])
-						.enter()
-						.append("line")
-						.attr("class", "weight_1")
-						.style("stroke", "black")
-						.attr("x1", function(d) {
-							debugger;
-							return lookupNeuron(0, d["coordinates"][0])["x"];
-						})
-						.attr("x2", function(d) {
-							return lookupNeuron(1, d["coordinates"][1])["x"];
-						})
-						.attr("y1", function(d) {
-							return lookupNeuron(0, d["coordinates"][0])["y"];
-						})
-						.attr("y2", function(d) {
-							return lookupNeuron(1, d["coordinates"][1])["y"];
-						})
-						.attr("stroke-width", function(d) {
-							return d['value'];
-						});
 
-var weights_2 = svg.selectAll(".weight_2")
-						.data(weights[1])
-						.enter()
-						.append("line")
-						.attr("class", "weight_2")
-						.style("stroke", "black")
-						.attr("x1", function(d) {
-							return lookupNeuron(1, d["coordinates"][0])["x"];
-						})
-						.attr("x2", function(d) {
-							return lookupNeuron(2, d["coordinates"][1])["x"];
-						})
-						.attr("y1", function(d) {
-							return lookupNeuron(1, d["coordinates"][0])["y"];
-						})
-						.attr("y2", function(d) {
-							return lookupNeuron(2, d["coordinates"][1])["y"];
-						})
-						.attr("stroke-width", function(d) {
-							return d['value'];
-						});
+function placeWeights(weight_index) {
+	var weights_single = svg.selectAll(".weight_".concat(weight_index))
+							.data(weights[weight_index])
+							.enter()
+							.append("line")
+							.attr("class", "weight_".concat(weight_index))
+							.style("stroke", "black")
+							.attr("x1", function(d) {
+								return lookupNeuron(weight_index, d["coordinates"][0])["x"];
+							})
+							.attr("x2", function(d) {
+								return lookupNeuron(weight_index+1, d["coordinates"][1])["x"];
+							})
+							.attr("y1", function(d) {
+								return lookupNeuron(weight_index, d["coordinates"][0])["y"];
+							})
+							.attr("y2", function(d) {
+								return lookupNeuron(weight_index+1, d["coordinates"][1])["y"];
+							})
+							.attr("stroke-width", function(d) {
+								return d['value'];
+							});
+}
+
+for (var i = 0; i < weights.length; i++) {
+	placeWeights(i)
+}
+
 {% endif %}
 </script>
 
@@ -123,30 +108,22 @@ var weights_2 = svg.selectAll(".weight_2")
 </form>
 
 <script>
-function updateShapes(data_new) {
+function updateWeights(data_new) {
   console.log("Entering update shapes");
 
-	var weights_1 = svg.selectAll(".weight_1")
-							.data(data_new[0])
-							.transition()
-				      .duration(2000)
-							.attr("stroke-width", function(d) {
-								return d['value'];
-							});
+	function updateSingleLayer(index) {
+		var weights_temp = svg.selectAll(".weight_".concat(index))
+								.data(data_new[index])
+								.transition()
+								.duration(1000)
+								.attr("stroke-width", function(d) {
+									return d['value'];
+								});
+							}
 
-	var weights_2 = svg.selectAll(".weight_2")
-							.data(data_new[0])
-							.transition()
-				      .duration(2000)
-							.attr("stroke-width", function(d) {
-								return d['value'];
-							});
-	//
-  // var neurons = svg.selectAll(".neuron")
-  // 		.data(data_new)
-  //     .transition()
-  //     .duration(2000)
-  //     .attr("r", function(d) { return d.value; });
+	for (var i = 0; i < data_new.length; i++) {
+		updateSingleLayer(i)
+	}
 };
 
 
@@ -156,7 +133,7 @@ function updateOneNeuron() {
         data: data,
         type: 'POST',
         success: function(response) {
-          updateShapes(response['data']);
+          updateWeights(response['data']);
         },
         error: function(error) {
           console.log(error);
