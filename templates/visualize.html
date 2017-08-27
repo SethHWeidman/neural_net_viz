@@ -134,6 +134,7 @@ function updateOneNeuron() {
         type: 'POST',
         success: function(response) {
           updateWeights(response['data']);
+					updateOneNeuron();
         },
         error: function(error) {
           console.log(error);

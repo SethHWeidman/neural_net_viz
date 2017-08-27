@@ -15,7 +15,7 @@ def read_key(key):
         try:
             return db[key]
         except KeyError:
-            return None
+            return False
 
 def create_key(key, value):
     """Add a new key-value pair to the shelve database."""

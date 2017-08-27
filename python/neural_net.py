@@ -117,16 +117,23 @@ class TwoLayerNetwork(NeuralNetwork):
     def update_num_layer_weights(self, loss, num=1):
         """ Calculate an output Y for the given input X. """
 
-        if db.read_key("next_weight_layer"):
+
+        if db.read_key("next_weight_layer") == False:
             next_weight_layer = db.read_key("next_weight_layer")
+            print("Read next weight layer", next_weight_layer)
         else:
             next_weight_layer = len(self.layers) - 1
             db.create_key("next_weight_layer", next_weight_layer)
+            print("Created next weight layer", next_weight_layer)
 
         relevant_layers = self.layers[:next_weight_layer+1][::-1][:num]
+        print(relevant_layers)
         loss_next = loss
         for layer in relevant_layers:
             loss_next = layer.bprop(loss_next)
 
+        # Update next_weight_layer
+        db.update_key('next_weight_layer', next_weight_layer-1)
+        db.update_key('nn', self)
         weights = self.return_weights()
         return weights

@@ -100,20 +100,11 @@ def visualize_data():
                            weights=db.read_key("weights"))
 
 
-@app.route('/update_one/', methods=['GET', 'POST'])
-def update_one():
-    coords = db.read_key("coordinates")
-    for item in coords:
-        if item['neuron'] == 0  and item['layer'] == 0:
-            item['value'] = 30.0
-    time.sleep(10)
-    return jsonify(data=coords)
-
-
 @app.route('/update_next_weight_layer/', methods=['GET', 'POST'])
 def update_next_layer():
     nn = db.read_key("neural_net")
     loss = db.read_key("loss")
+    weight_values_before = nn.return_weights()
     weight_values = nn.update_num_layer_weights(loss, num=1)
     weight_values = clean_weights(weight_values)
     weights = update_weight_values(db.read_key('weights'), weight_values)
@@ -132,32 +123,10 @@ def visualize_neurons():
     xs_ys, weights = plot_net(num_input, num_hidden, 480, 600)
     db.create_key('data', xs_ys)
     db.create_key('weights', weights)
+    db.delete_key('next_weight_layer')
     return render_template('visualize_neurons.html',
                            data=db.read_key('data'),
                            weights=db.read_key('weights'))
-
-
-
-# @app.route('/update_neurons/', methods=['GET', 'POST'])
-# def initialize_weights():
-    # Take the weights from the Network and change the thicknesses of the lines
-    # accordingly
-
-
-# def update_neurons():
-    # Add a button that loads some SkLearn data into the database.
-
-    # use the current weights of the network to update the sizes of the neurons.
-    # height = db.find_key('dimensions')['height']
-    # width = db.find_key('dimensions')['width']
-    # xs_ys, weights = plot_net(num_input, num_hidden, height, width)
-    # db.update_key('data', xs_ys)
-    # db.update_key('weights', weights)
-    # print(weights)
-    # return render_template('index.html',
-    #                        dimensions=db.find_key('dimensions'),
-    #                        data=db.find_key('data'),
-    #                        weights=db.find_key('weights'))
 
 
 @app.route('/reset_data/', methods=['GET', 'POST'])
@@ -170,6 +139,8 @@ def reset_data():
         db.create_key("weights", [])
     if not db.read_key("coordinates"):
         db.create_key("coordinates", [])
+    if db.read_key("next_weight_layer"):
+        db.delete_key("next_weight_layer")
     return render_template('index.html',
                            coordinates=db.read_key('coordinates'),
                            data=db.read_key('data'),
