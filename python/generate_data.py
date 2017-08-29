@@ -32,3 +32,12 @@ def generate_data(input_neurons):
     db.create_key("num_obs", num_obs)
 
     return df
+
+
+def read_x_row():
+
+    df_x = db.read_key('dataframe')[db.read_key('x_cols')]
+    samp = np.random.randint(0, db.read_key('num_obs'))
+    x_row = np.array(df_x.iloc[samp, :], ndmin=2)
+
+    return x_row

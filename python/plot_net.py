@@ -37,7 +37,7 @@ def plot_net(num_input, num_hidden, height, width):
     output_neuron = [{'x': output_x, 'y': y, 'layer': 2, 'neuron': i, 'value': 1} for i, y in enumerate([output_y])]
 
     # All the neurons
-    all_neurons = input_neurons + hidden_neurons + output_neuron
+    all_neurons = [input_neurons] + [hidden_neurons] + [output_neuron]
 
     # A "weight dictionary"
     all_weights = [weights_1] + [weights_2]
@@ -70,7 +70,7 @@ def update_coordinate_values(layers, coords):
     '''
     for i in range(len(layers)):
         layer = layers[i]
-        for item in coords:
+        for item in coords[i]:
             for j, element in enumerate(layer):
                 if item['layer'] == i and item['neuron'] == j:
                     item['value'] = element

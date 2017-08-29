@@ -15,14 +15,14 @@
 var data = {{ data|safe }};
 var weights = {{ weights|safe }};
 
-
 function lookupNeuron(layer, neuron) {
-	for (var el in data) {
-		// debugger;
-	  if (data[el]["layer"] == layer && data[el]["neuron"] == neuron) {
-	    	return {"x": data[el]["x"], "y": data[el]["y"]};
+		data_layer = data[layer]
+		for (var i = 0; i < data_layer.length; i++) {
+			el = data_layer[i];
+		  if (el["layer"] == layer && el["neuron"] == neuron) {
+		    	return {"x": el["x"], "y": el["y"]};
+				};
 			};
-	};
 };
 
 
@@ -42,31 +42,37 @@ var svg = d3.select("body").append("svg")
 		.attr("height", height);
 
 {% if data %}
+function enterNeurons(neuron_index) {
+	var neurons = svg.selectAll(".neuron_".concat(neuron_index))
+			.data(data[neuron_index])
+			.enter()
+			.append("circle")
+			.attr("class", "neuron_".concat(neuron_index))
+			.attr("cx", function(d) { return d.x; })
+			.attr("cy", function(d) { return d.y; })
+	    .attr("r", function(d) { return d.value; });
+			// .on("mouseover", function(d) {
+	    //     div.style("left", d.x + 20 + "px")
+			// 			 .style("top", d.y - 30 + "px")
+			// 			 .text(d.y)
+			// 			 .transition()
+	    //        .duration(200)
+			// 			 .style("opacity", .9)
+			// 			})
+			// .on("mouseout", function(d) {
+	    //     div.style("left", d.x + 20 + "px")
+			// 			 .style("top", d.y - 30 + "px")
+			// 		   .text(d.y)
+			// 			 .transition()
+	    //        .duration(500)
+	    //        .style("opacity", 0);
+			// 			 });
+}
 
-var neurons = svg.selectAll(".neuron")
-		.data(data)
-		.enter()
-		.append("circle")
-		.attr("class", "neuron")
-		.attr("cx", function(d) { return d.x; })
-		.attr("cy", function(d) { return d.y; })
-    .attr("r", function(d) { return d.value; })
-		.on("mouseover", function(d) {
-        div.style("left", d.x + 20 + "px")
-					 .style("top", d.y - 30 + "px")
-					 .text(d.y)
-					 .transition()
-           .duration(200)
-					 .style("opacity", .9)
-					})
-		.on("mouseout", function(d) {
-        div.style("left", d.x + 20 + "px")
-					 .style("top", d.y - 30 + "px")
-				   .text(d.y)
-					 .transition()
-           .duration(500)
-           .style("opacity", 0);
-					 });
+for (var i = 0; i < data.length; i++) {
+	enterNeurons(i)
+}
+
 {% endif %}
 {% if weights %}
 
@@ -99,19 +105,25 @@ for (var i = 0; i < weights.length; i++) {
 }
 
 {% endif %}
-</script>
 
-<form action="{{ url_for('reset_data')}}" method="post">
-<button id="resetData">
-	Reset the data.
-</button>
-</form>
+function updateNeurons(data_new) {
 
-<script>
+	function updateSingleNeuronLayer(index) {
+		var weights_temp = svg.selectAll(".neuron_".concat(index))
+								.data(data_new[index])
+								.transition()
+								.duration(1000)
+								.attr("r", function(d) { return d['value']; });
+							}
+
+	for (var i = 0; i < data_new.length; i++) {
+		updateSingleNeuronLayer(i)
+	}
+};
+
 function updateWeights(data_new) {
-  console.log("Entering update shapes");
 
-	function updateSingleLayer(index) {
+	function updateSingleWeightLayer(index) {
 		var weights_temp = svg.selectAll(".weight_".concat(index))
 								.data(data_new[index])
 								.transition()
@@ -122,19 +134,17 @@ function updateWeights(data_new) {
 							}
 
 	for (var i = 0; i < data_new.length; i++) {
-		updateSingleLayer(i)
+		updateSingleWeightLayer(i)
 	}
 };
 
-
-function updateOneNeuron() {
+function updateOneLayerNeuron() {
       $.ajax({
-        url: {{ url_for('update_next_layer')}},
+        url: {{ url_for('update_next_neurons')}},
         data: data,
         type: 'POST',
         success: function(response) {
-          updateWeights(response['data']);
-					updateOneNeuron();
+          updateNeurons(response['data']);
         },
         error: function(error) {
           console.log(error);
@@ -142,9 +152,47 @@ function updateOneNeuron() {
     })
   };
 
-updateOneNeuron();
+function updateOneLayerWeights() {
+      $.ajax({
+        url: {{ url_for('update_next_weights')}},
+        data: data,
+        type: 'POST',
+        success: function(response) {
+          updateWeights(response['data']);
+        },
+        error: function(error) {
+          console.log(error);
+        }
+    });
+  };
+
+function singleFullPass() {
+	console.log("Entering single full pass")
+	for (var i = 0; i < data.length - 1; i++) {
+		updateOneLayerWeights();
+	}
+
+	for (var i = 0; i < data.length; i++) {
+		updateOneLayerNeuron();
+	}
+
+}
 </script>
 
+<form action="{{ url_for('reset_data')}}" method="post">
+<button id="resetData">
+	Reset the data.
+</button>
+</form>
+
+
+<button id="weightUpdate" onclick="updateOneLayerWeights();">
+	Update next weights.
+</button>
+
+<button id="neuronUpdate" onclick="updateOneLayerNeuron();">
+	Update next neurons.
+</button>
 
 </body>
 </html>

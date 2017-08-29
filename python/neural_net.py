@@ -77,6 +77,7 @@ class Linear(Layer):
         self.iteration += 1
         return output_grad
 
+
 def sigmoid(x, bprop=False):
     if bprop:
         s = sigmoid(x)
@@ -114,26 +115,61 @@ class TwoLayerNetwork(NeuralNetwork):
         return weights
 
 
+    def return_num_layers(self, X, num=1):
+        """ Calculate an output Y for the given input X. """
+
+        # Read in the correct weight layer
+        if db.read_key("next_layer") == False:
+            next_layer = db.read_key("next_layer")
+        else:
+            next_layer = 0
+            db.create_key("next_layer", next_layer)
+
+        print("Updating neurons for next_layer:", next_layer)
+        # Layer outputs
+        layer_outputs = [np.mean(layer.layer_input, axis=0) for layer in self.layers]
+        relevant_layers = self.layers[:next_layer][:num]
+        X_next = X
+        for i, layer in enumerate(relevant_layers):
+            X_next = layer.fprop(X_next)
+            layout_outputs[next_layer + i] = np.mean(X_next, axis=0)
+
+        # Update next_weight_layer
+        if next_layer != len(self.layers):
+            db.update_key('next_layer', next_layer + 1)
+
+        return layer_outputs
+
+
     def update_num_layer_weights(self, loss, num=1):
         """ Calculate an output Y for the given input X. """
 
+        weights = self.return_weights()
 
-        if db.read_key("next_weight_layer") == False:
-            next_weight_layer = db.read_key("next_weight_layer")
-            print("Read next weight layer", next_weight_layer)
+        if db.read_key("next_layer") != False:
+            next_layer = db.read_key("next_layer")
+            # print("Read next weight layer", next_weight_layer)
         else:
-            next_weight_layer = len(self.layers) - 1
-            db.create_key("next_weight_layer", next_weight_layer)
-            print("Created next weight layer", next_weight_layer)
+            next_layer = len(self.layers)
+            db.create_key("next_layer", next_layer)
+            # print("Created next weight layer", next_weight_layer)
 
-        relevant_layers = self.layers[:next_weight_layer+1][::-1][:num]
-        print(relevant_layers)
+        print("Next layer for weight update is:", next_layer)
+
+        relevant_layers = self.layers[:next_layer][::-1][:num]
         loss_next = loss
+
         for layer in relevant_layers:
             loss_next = layer.bprop(loss_next)
 
+        weights_after = self.return_weights()
+        # if db.read_key("next_layer") == 1:
+        #     import pdb; pdb.set_trace()
         # Update next_weight_layer
-        db.update_key('next_weight_layer', next_weight_layer-1)
-        db.update_key('nn', self)
-        weights = self.return_weights()
-        return weights
+        if next_layer != 0:
+            db.update_key('next_layer', next_layer - 1)
+
+        db.update_key('neural_net', self)
+        db.update_key('next_grad', loss_next)
+
+        return weights_after

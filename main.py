@@ -4,6 +4,7 @@ from python.plot_net import plot_net
 from python.plot_net import update_coordinate_values
 from python.plot_net import update_weight_values
 from python.generate_data import generate_data
+from python.generate_data import read_x_row
 from python.neural_net import TwoLayerNetwork, Linear, sigmoid
 import python.database as db
 import pandas as pd
@@ -25,7 +26,7 @@ def clean_layer(layer):
     '''
 
     if len(layer) == 1:
-        return [15.0]
+        return [layer[0] * 10.0 + 10.0]
     else:
         mi = np.amin(layer)
         ma = np.amax(layer)
@@ -92,24 +93,41 @@ def visualize_data():
 
     db.create_key("coordinates", coords)
     db.create_key("weights", weights)
-    db.create_key("loss", loss.tolist())
+    db.create_key("next_grad", loss)
     db.create_key("neural_net", nn)
+
     # Render the template!
     return render_template('visualize.html',
                            data=db.read_key("coordinates"),
                            weights=db.read_key("weights"))
 
 
-@app.route('/update_next_weight_layer/', methods=['GET', 'POST'])
-def update_next_layer():
+@app.route('/update_next_neuron_layer/', methods=['GET', 'POST'])
+def update_next_neurons():
+    print("Updating neurons in layer", db.read_key('next_layer'))
     nn = db.read_key("neural_net")
-    loss = db.read_key("loss")
-    weight_values_before = nn.return_weights()
-    weight_values = nn.update_num_layer_weights(loss, num=1)
-    weight_values = clean_weights(weight_values)
-    weights = update_weight_values(db.read_key('weights'), weight_values)
+    x_row = read_x_row()
+    layers = nn.return_num_layers(x_row)
+    layers_clean = [clean_layer(layer) for layer in layers]
+    coords = update_coordinate_values(layers_clean, db.read_key('coordinates'))
+    db.update_key('coordinates', coords)
     time.sleep(5)
-    print("Updated weight layer in Python")
+    print("Updated neurons in layer", db.read_key('next_layer')-1)
+    return jsonify(data=coords)
+
+
+@app.route('/update_next_weight_layer/', methods=['GET', 'POST'])
+def update_next_weights():
+    print("Updating weights before layer", db.read_key('next_layer'))
+    nn = db.read_key("neural_net")
+    next_grad = db.read_key("next_grad")
+    weights_before = db.read_key('weights')
+    weight_values_before_clean = nn.update_num_layer_weights(next_grad, num=1)
+    weight_values_after_clean = clean_weights(weight_values_before_clean)
+    weights = update_weight_values(db.read_key('weights'), weight_values_after_clean)
+    db.update_key('weights', weights)
+    time.sleep(1)
+    print("Updating weights before layer", db.read_key('next_layer')+1)
     return jsonify(data=weights)
 
 

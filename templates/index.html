@@ -54,6 +54,24 @@ $(function(){
 </button>
 </form>
 
+<form action="{{ url_for('reset_data')}}" method="post">
+<button id="resetData">
+	Reset the data.
+</button>
+</form>
+
+<form action="{{ url_for('update_next_weights')}}" method="post">
+<button id="weightUpdate">
+	Update next weights.
+</button>
+</form>
+
+<form action="{{ url_for('update_next_neurons')}}" method="post">
+<button id="neuronUpdate">
+	Update next neurons.
+</button>
+</form>
+
 
 </body>
 </html>

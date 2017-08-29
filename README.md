@@ -2,9 +2,9 @@
 A simple neural net visualization using Flask and D3
 
 ## Instructions
-Run `python main.py` and navigate to `http://127.0.0.1:5000/` to see the app in action.
+Run `python main.py` and navigate to `http://127.0.0.1:5001/` to see the app in action.
 
-## To-do
+## To-do:
 
-Make future weight layers of the network update (easy)
-Add "current weight layer" to database (easy)
+Change class neurons so each layer has a different class (medium).
+Update one layer of neurons at a time (medium). 
