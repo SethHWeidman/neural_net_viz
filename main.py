@@ -95,6 +95,7 @@ def visualize_data():
     db.create_key("weights", weights)
     db.create_key("next_grad", loss)
     db.create_key("neural_net", nn)
+    db.create_key("next_layer", len(nn.layers))
 
     # Render the template!
     return render_template('visualize.html',
@@ -118,7 +119,9 @@ def update_next_neurons():
 
 @app.route('/update_next_weight_layer/', methods=['GET', 'POST'])
 def update_next_weights():
-    print("Updating weights before layer", db.read_key('next_layer'))
+    if db.read_key('next_layer') < 1:
+        weights = db.read_key('weights')
+        return jsonify(data=weights)
     nn = db.read_key("neural_net")
     next_grad = db.read_key("next_grad")
     weights_before = db.read_key('weights')
