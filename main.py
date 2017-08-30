@@ -76,8 +76,9 @@ def visualize_data():
 
     # Take this single observation and run it through the network to generate
     # values for the layers
-    layers, prediction = nn.return_forwardpass_info(x_row)
-    layers_clean = [clean_layer(layer) for layer in layers]
+    layer_values, prediction = nn.return_forwardpass_info(x_row)
+    print("layer_values", layer_values)
+    layers_clean = [clean_layer(layer) for layer in layer_values]
 
     # Simply extract the weight values
     weight_values = nn.return_weights()
@@ -93,6 +94,9 @@ def visualize_data():
 
     db.create_key("coordinates", coords)
     db.create_key("weights", weights)
+    db.create_key("x_data", x_row)
+    db.create_key("layer_values", layer_values)
+    db.create_key("prediction", prediction)
     db.create_key("next_grad", loss)
     db.create_key("neural_net", nn)
     db.create_key("next_layer", len(nn.layers))
@@ -105,12 +109,22 @@ def visualize_data():
 
 @app.route('/update_next_neuron_layer/', methods=['GET', 'POST'])
 def update_next_neurons():
-    print("Updating neurons in layer", db.read_key('next_layer'))
+    print("Next layer:", db.read_key('next_layer'))
+    if db.read_key('next_layer') > len(db.read_key('neural_net').layers):
+        coords = db.read_key('coordinates')
+        return jsonify(data=coords)
+
     nn = db.read_key("neural_net")
-    x_row = read_x_row()
+    if db.read_key('next_layer') == 0:
+        x_row = read_x_row()
+        db.update_key("x_data", x_row)
+    else:
+        x_row = db.read_key("x_data")
     layers = nn.return_num_layers(x_row)
     layers_clean = [clean_layer(layer) for layer in layers]
+    print("layers_clean", layers_clean)
     coords = update_coordinate_values(layers_clean, db.read_key('coordinates'))
+    print("Coordinates:", coords)
     db.update_key('coordinates', coords)
     time.sleep(5)
     print("Updated neurons in layer", db.read_key('next_layer')-1)
@@ -119,6 +133,7 @@ def update_next_neurons():
 
 @app.route('/update_next_weight_layer/', methods=['GET', 'POST'])
 def update_next_weights():
+    print("Next layer:", db.read_key('next_layer'))
     if db.read_key('next_layer') < 1:
         weights = db.read_key('weights')
         return jsonify(data=weights)

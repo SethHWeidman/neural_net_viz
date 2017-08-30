@@ -119,25 +119,24 @@ class TwoLayerNetwork(NeuralNetwork):
         """ Calculate an output Y for the given input X. """
 
         # Read in the correct weight layer
-        if db.read_key("next_layer") == False:
+        if db.read_key("next_layer") != False:
             next_layer = db.read_key("next_layer")
         else:
             next_layer = 0
             db.create_key("next_layer", next_layer)
 
-        print("Updating neurons for next_layer:", next_layer)
-        # Layer outputs
-        layer_outputs = [np.mean(layer.layer_input, axis=0) for layer in self.layers]
-        relevant_layers = self.layers[:next_layer][:num]
+        layer_outputs = db.read_key("layer_values")
         X_next = X
+        layer_outputs[0] = np.mean(X_next, axis=0)
+        relevant_layers = self.layers[:next_layer][:num]
         for i, layer in enumerate(relevant_layers):
             X_next = layer.fprop(X_next)
-            layout_outputs[next_layer + i] = np.mean(X_next, axis=0)
+            layer_outputs[next_layer + i] = np.mean(X_next, axis=0)
 
+        db.update_key("layer_values", layer_outputs)
         # Update next_weight_layer
         if next_layer != len(self.layers):
             db.update_key('next_layer', next_layer + 1)
-
         return layer_outputs
 
 
